@@ -15,6 +15,7 @@ import {
     getDoc, 
     collection, 
     addDoc,
+    deleteDoc,
     getDocs
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai";
@@ -51,7 +52,6 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// 🔹 Signup Function (Email & Password)
 // 🔹 Signup Function (Email & Password with Confirm Password)
 document.getElementById("signup-btn")?.addEventListener("click", async () => {
     const name = document.getElementById("signup-name").value;
@@ -254,3 +254,51 @@ document.getElementById("view-profile-btn")?.addEventListener("click", () => {
 document.getElementById("go-back-btn")?.addEventListener("click", () => {
     window.location.href = "home.html";
 });
+
+// Edit and Update Profile
+document.getElementById("editProfileBtn")?.addEventListener("click", async () => {
+    const editForm = document.getElementById("editProfileForm");
+    editForm.style.display = "block";
+  
+    const user = auth.currentUser;
+    if (!user) {
+      alert("User not found. Please log in again.");
+      return;
+    }
+  
+    const userDocRef = doc(db, "users", user.uid);
+    const userDoc = await getDoc(userDocRef);
+  
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      document.getElementById("editName").value = userData.name || "";
+      document.getElementById("editAge").value = userData.age || "";
+      document.getElementById("editPhone").value = userData.phone || "";
+    } else {
+      alert("User data not found!");
+    }
+  });
+  
+  document.getElementById("saveProfileBtn")?.addEventListener("click", async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      alert("User not found. Please log in again.");
+      return;
+    }
+  
+    const updatedData = {
+      name: document.getElementById("editName").value,
+      age: document.getElementById("editAge").value,
+      phone: document.getElementById("editPhone").value,
+    };
+  
+    try {
+      await setDoc(doc(db, "users", user.uid), updatedData, { merge: true });
+      alert("Profile updated successfully!");
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile. Please try again.");
+    }
+  });
+  

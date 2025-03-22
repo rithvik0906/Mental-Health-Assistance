@@ -80,8 +80,8 @@ document.getElementById("signup-btn")?.addEventListener("click", async () => {
     }
 
     // ✅ Validate password
-    if (password.length < 8 || !/\d/.test(password)) {
-        alert("Password must be at least 8 characters long and contain at least one numerical digit.");
+    if (password.length < 8 || !/\d/.test(password) || !/[a-zA-Z]/.test(password)) {
+        alert("Password must be at least 8 characters long and contain at least one numerical digit and one letter.");
         return;
     }
 
@@ -204,6 +204,8 @@ document.getElementById("mental-health-form")?.addEventListener("submit", async 
     suggestionsText.innerHTML = "<p>Analyzing your problem... Please wait.</p>";
     hospitalSuggestion.innerHTML = "";
 
+    let hospitalUrl = "";
+
     // Detect current location if selected
     if (location === "Current Location") {
         if (navigator.geolocation) {
@@ -211,13 +213,19 @@ document.getElementById("mental-health-form")?.addEventListener("submit", async 
                 const latitude = position.coords.latitude;
                 const longitude = position.coords.longitude;
 
-                const hospitalUrl = `https://www.google.com/maps/search/mental+health+hospital/@${latitude},${longitude},15z`;
+                hospitalUrl = `https://www.google.com/maps/search/mental+health+hospital/@${latitude},${longitude},15z`;
+                hospitalSuggestion.innerHTML = `<p><strong>If the problem persists, Consider visiting a mental health specialist.</strong><br><a href="${hospitalUrl}" target="_blank">Find hospitals near your Current Location</a></p>`;
             }, (error) => {
                 alert("Failed to get your location. Please check location permissions.");
+                hospitalSuggestion.innerHTML = "<p>Failed to get your location. Please check location permissions.</p>";
             });
         } else {
             alert("Geolocation is not supported by your browser.");
+            hospitalSuggestion.innerHTML = "<p>Geolocation is not supported by your browser.</p>";
         }
+    } else {
+        hospitalUrl = `https://www.google.com/maps/search/mental+health+hospital+in+${encodeURIComponent(location)}`;
+        hospitalSuggestion.innerHTML = `<p><strong>If the problem persists, Consider visiting a mental health specialist.</strong><br><a href="${hospitalUrl}" target="_blank">Find hospitals near ${location}</a></p>`;
     }
 
     try {
@@ -245,7 +253,7 @@ document.getElementById("mental-health-form")?.addEventListener("submit", async 
             Analyze the user's emotions and detect the primary sentiment.
             Provide detailed insights into their emotional state based on the analysis.
 
-              - Suggest personalized advice considering their age and detected emotions.
+              - Suggest personalized advice considering their age and detected emotions (ignore age if not available).
               - Recommend effective coping techniques specific to their emotional state.
               - Provide practical relaxation exercises, mindset shifts, or self-care routines.
               - If signs of severe distress or crisis are identified, recommend seeking professional support.
@@ -262,8 +270,6 @@ document.getElementById("mental-health-form")?.addEventListener("submit", async 
         text = text.replace(/(<li>.*?<\/li>(?:\n<li>.*?<\/li>)*)/gs, "<ul>$1</ul>");
 
         suggestionsText.innerHTML = text || "<p>No suggestions available at the moment.</p>";
-        const hospitalUrl = `https://www.google.com/maps/search/mental+health+hospital+in+${encodeURIComponent(location)}`;
-        hospitalSuggestion.innerHTML = `<p><strong>If the problem persists, Consider visiting a mental health specialist.</strong><br><a href="${hospitalUrl}" target="_blank">Find hospitals near ${location}</a></p>`;
         window.scrollTo({ top: 0, behavior: "smooth" });
 
     } catch (err) {

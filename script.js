@@ -1,19 +1,19 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-import { 
-    getAuth, 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword, 
-    GoogleAuthProvider, 
-    signInWithPopup, 
-    onAuthStateChanged, 
-    signOut 
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    GoogleAuthProvider,
+    signInWithPopup,
+    onAuthStateChanged,
+    signOut
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
-import { 
-    getFirestore, 
-    doc, 
-    setDoc, 
-    getDoc, 
-    collection, 
+import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    collection,
     addDoc,
     deleteDoc,
     getDocs
@@ -67,16 +67,34 @@ document.getElementById("signup-btn")?.addEventListener("click", async () => {
         return;
     }
 
+    // ✅ Validate phone number
+    if (!/^\d{10}$/.test(phone)) {
+        alert("Phone number must be exactly 10 digits.");
+        return;
+    }
+
+    // ✅ Validate age
+    if (age > 120) {
+        alert("Age cannot be more than 120.");
+        return;
+    }
+
+    // ✅ Validate password
+    if (password.length < 8 || !/\d/.test(password)) {
+        alert("Password must be at least 8 characters long and contain at least one numerical digit.");
+        return;
+    }
+
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
         // ✅ Store user details in Firestore
-        await setDoc(doc(db, "users", user.uid), { 
-            name, 
-            age: age.toString(), 
-            phone, 
-            email 
+        await setDoc(doc(db, "users", user.uid), {
+            name,
+            age: age.toString(),
+            phone,
+            email
         });
 
         alert("Signup Successful! Redirecting to Login...");
@@ -117,11 +135,11 @@ async function handleGoogleAuth() {
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (!userDoc.exists()) {
             // ✅ Store new Google user in Firestore
-            await setDoc(doc(db, "users", user.uid), { 
-                name: user.displayName, 
-                age: "N/A", 
-                phone: "N/A", 
-                email: user.email 
+            await setDoc(doc(db, "users", user.uid), {
+                name: user.displayName,
+                age: user.age || "N/A",
+                phone: user.phoneNumber || "N/A",
+                email: user.email
             });
         }
 
@@ -136,33 +154,30 @@ async function handleGoogleAuth() {
 document.getElementById("google-signup-btn")?.addEventListener("click", handleGoogleAuth);
 document.getElementById("google-login-btn")?.addEventListener("click", handleGoogleAuth);
 
-  
 // Apply Dark Mode Based on Local Storage
 window.addEventListener('load', () => {
     const storedMode = localStorage.getItem('darkMode');
     const isDarkMode = storedMode === 'enabled';
-    
+
     if (isDarkMode) {
-      document.body.classList.add('dark-mode');
-      document.getElementById('darkModeToggle').innerHTML = '🌞'; // Light Mode Emoji
+        document.body.classList.add('dark-mode');
+        document.getElementById('darkModeToggle').innerHTML = '🌞'; // Light Mode Emoji
     } else {
-      document.body.classList.remove('dark-mode');
-      document.getElementById('darkModeToggle').innerHTML = '🌙'; // Dark Mode Emoji
+        document.body.classList.remove('dark-mode');
+        document.getElementById('darkModeToggle').innerHTML = '🌙'; // Dark Mode Emoji
     }
-  });
-  
-  // Toggle Dark Mode and Save State
-  document.getElementById('darkModeToggle')?.addEventListener('click', () => {
+});
+
+// Toggle Dark Mode and Save State
+document.getElementById('darkModeToggle')?.addEventListener('click', () => {
     document.body.classList.toggle('dark-mode');
-  
+
     const isDarkMode = document.body.classList.contains('dark-mode');
     localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
-  
+
     document.getElementById('darkModeToggle').innerHTML = isDarkMode ? '🌞' : '🌙';
-  });
-  
-  
-  
+});
+
 // 🔹 Logout Function
 document.getElementById("logout-btn")?.addEventListener("click", async () => {
     try {
@@ -191,21 +206,19 @@ document.getElementById("mental-health-form")?.addEventListener("submit", async 
 
     // Detect current location if selected
     if (location === "Current Location") {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
 
-        const hospitalUrl = `https://www.google.com/maps/search/mental+health+hospital/@${latitude},${longitude},15z`;
-        //document.getElementById("hospital-suggestion").innerHTML = `<p><strong>Nearby Hospitals:</strong><br><a href="${hospitalUrl}" target="_blank">Find hospitals near your current location</a></p>`;
-        }, (error) => {
-        alert("Failed to get your location. Please check location permissions.");
-        });
-    } else {
-        alert("Geolocation is not supported by your browser.");
+                const hospitalUrl = `https://www.google.com/maps/search/mental+health+hospital/@${latitude},${longitude},15z`;
+            }, (error) => {
+                alert("Failed to get your location. Please check location permissions.");
+            });
+        } else {
+            alert("Geolocation is not supported by your browser.");
+        }
     }
-    }
-
 
     try {
         const user = auth.currentUser;
@@ -227,22 +240,21 @@ document.getElementById("mental-health-form")?.addEventListener("submit", async 
         });
 
         const result = await model.generateContent(
-            `The user is ${ageText} years old and is facing "${problem}". They describe it as: "${description}". 
-        
-            Analyze the user's emotions and detect the primary sentiment. 
+            `The user is ${ageText} years old and is facing "${problem}". They describe it as: "${description}".
+
+            Analyze the user's emotions and detect the primary sentiment.
             Provide detailed insights into their emotional state based on the analysis.
 
-              - Suggest personalized advice considering their age and detected emotions.  
-              - Recommend effective coping techniques specific to their emotional state.  
-              - Provide practical relaxation exercises, mindset shifts, or self-care routines.  
-              - If signs of severe distress or crisis are identified, recommend seeking professional support.  
+              - Suggest personalized advice considering their age and detected emotions.
+              - Recommend effective coping techniques specific to their emotional state.
+              - Provide practical relaxation exercises, mindset shifts, or self-care routines.
+              - If signs of severe distress or crisis are identified, recommend seeking professional support.
 
-            Keep responses clear, short, empathetic, supportive, and actionable.  
-            Use compassionate language that acknowledges the user's feelings.  
+            Keep responses clear, short, empathetic, supportive, and actionable.
+            Use compassionate language that acknowledges the user's feelings.
             Format as a structured list with clear headings for each suggestion.
             Make sure each and every point displays in a new line.`
         );
-        
 
         let text = await result.response.text();
         text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
@@ -319,47 +331,58 @@ document.getElementById("go-back-btn")?.addEventListener("click", () => {
 document.getElementById("editProfileBtn")?.addEventListener("click", async () => {
     const editForm = document.getElementById("editProfileForm");
     editForm.style.display = "block";
-  
+
     const user = auth.currentUser;
     if (!user) {
-      alert("User not found. Please log in again.");
-      return;
+        alert("User not found. Please log in again.");
+        return;
     }
-  
+
     const userDocRef = doc(db, "users", user.uid);
     const userDoc = await getDoc(userDocRef);
-  
+
     if (userDoc.exists()) {
-      const userData = userDoc.data();
-      document.getElementById("editName").value = userData.name || "";
-      document.getElementById("editAge").value = userData.age || "";
-      document.getElementById("editPhone").value = userData.phone || "";
+        const userData = userDoc.data();
+        document.getElementById("editName").value = userData.name || "";
+        document.getElementById("editAge").value = userData.age || "";
+        document.getElementById("editPhone").value = userData.phone || "";
     } else {
-      alert("User data not found!");
+        alert("User data not found!");
     }
     window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-  
-  document.getElementById("saveProfileBtn")?.addEventListener("click", async () => {
+});
+
+document.getElementById("saveProfileBtn")?.addEventListener("click", async () => {
     const user = auth.currentUser;
     if (!user) {
-      alert("User not found. Please log in again.");
-      return;
+        alert("User not found. Please log in again.");
+        return;
     }
-  
+
     const updatedData = {
-      name: document.getElementById("editName").value,
-      age: document.getElementById("editAge").value,
-      phone: document.getElementById("editPhone").value,
+        name: document.getElementById("editName").value,
+        age: document.getElementById("editAge").value,
+        phone: document.getElementById("editPhone").value,
     };
-  
-    try {
-      await setDoc(doc(db, "users", user.uid), updatedData, { merge: true });
-      alert("Profile updated successfully!");
-      window.location.reload();
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      alert("Failed to update profile. Please try again.");
+
+    // ✅ Validate phone number
+    if (!/^\d{10}$/.test(updatedData.phone)) {
+        alert("Phone number must be exactly 10 digits.");
+        return;
     }
-  });
-  
+
+    // ✅ Validate age
+    if (updatedData.age > 120) {
+        alert("Age cannot be more than 120.");
+        return;
+    }
+
+    try {
+        await setDoc(doc(db, "users", user.uid), updatedData, { merge: true });
+        alert("Profile updated successfully!");
+        window.location.reload();
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        alert("Failed to update profile. Please try again.");
+    }
+});

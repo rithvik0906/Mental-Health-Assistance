@@ -1,7 +1,28 @@
-/* 🌿 Soothing Background with Gradient Animation */
-body {
-    background: linear-gradient(135deg, #a8edea, #fed6e3, #a8edea);
-    background-size: 400% 400%;
+/* 🌿 Soothing Background with Gradient Animation (Light Mode) */
+:root {
+    --bg-color: linear-gradient(135deg, #a8edea, #fed6e3, #a8edea);
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --text-color: #37474f;
+    --primary-color: #4db6ac;
+    --danger-color: #e57373;
+    --link-color: #00796b;
+  }
+  
+  /* 🌙 Dark Mode Colors */
+  .dark-mode {
+    --bg-color: linear-gradient(135deg, #1e1e1e, #2c3e50, #34495e);
+    --card-bg: rgba(40, 44, 52, 0.95);
+    --text-color: #ecf0f1;
+    --primary-color: #00bcd4;
+    --danger-color: #e74c3c;
+    --link-color: #00acc1;
+  }
+  
+  /* Apply Dynamic Colors */
+  body {
+    background: var(--bg-color);
+    background-size: cover;
+    color: var(--text-color);
     animation: gradientBG 15s ease infinite;
     display: flex;
     justify-content: center;
@@ -10,39 +31,42 @@ body {
     font-family: 'Poppins', sans-serif;
     margin: 0;
     padding: 20px;
-}
-
-/* 🌟 Gradient Animation */
-@keyframes gradientBG {
+  }
+  /* Adapt Heading Text for Both Modes */
+  h1, h2, h3, h4, h5, h6, p {
+    color: var(--text-color);
+  }
+  
+  /* 🌟 Gradient Animation */
+  @keyframes gradientBG {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
-}
-
-/* 📌 Card Styling with Hover Effect */
-.card {
-    background: rgba(255, 255, 255, 0.95);
+  }
+  
+  /* 📌 Card Styling with Hover Effect */
+  .card {
+    background: var(--card-bg);
     box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.15);
     border-radius: 20px;
     padding: 30px;
     width: 100%;
     max-width: 450px;
-    text-align: center;
     transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-}
-
-.card:hover {
+  }
+  
+  .card:hover {
     transform: translateY(-10px);
     box-shadow: 0px 12px 40px rgba(0, 0, 0, 0.2);
-}
-
-/* 🔹 Input Fields with Floating Labels */
-.form-group {
+  }
+  
+  /* 🔹 Input Fields with Floating Labels */
+  .form-group {
     position: relative;
     margin-bottom: 20px;
-}
-
-.form-control {
+  }
+  
+  .form-control {
     border-radius: 12px;
     border: 2px solid #b2dfdb;
     padding: 12px 15px;
@@ -50,16 +74,16 @@ body {
     background-color: #f7fdfc;
     transition: all 0.3s ease-in-out;
     width: 100%;
-}
-
-.form-control:focus {
-    border-color: #4db6ac;
+  }
+  
+  .form-control:focus {
+    border-color: var(--primary-color);
     box-shadow: 0px 0px 12px rgba(77, 182, 172, 0.5);
     outline: none;
-}
-
-/* 🎨 Buttons with Hover Effects */
-.btn {
+  }
+  
+  /* 🎨 Buttons with Hover Effects */
+  .btn {
     font-size: 16px;
     font-weight: bold;
     border-radius: 12px;
@@ -68,145 +92,133 @@ body {
     cursor: pointer;
     border: none;
     width: 100%;
-}
-
-/* 🌱 Primary Button (For Actions like Login/Signup) */
-.btn-primary {
-    background-color: #4db6ac;
+  }
+  
+  .btn-primary {
+    background-color: var(--primary-color);
     color: white;
-}
-
-.btn-primary:hover {
+  }
+  
+  .btn-primary:hover {
     background-color: #00897b;
-    transform: scale(1.05);
-}
-
-/* ❌ Danger Button (For Logout or Alerts) */
-.btn-danger {
-    background-color: #e57373;
+  }
+  
+  .btn-danger {
+    background-color: var(--danger-color);
     color: white;
-}
-
+  }
+  
 .btn-danger:hover {
     background-color: #d32f2f;
     transform: scale(1.05);
 }
-
-/* 🔗 Links with Hover Effects */
-a {
-    color: #00796b;
+  
+  /* 🔗 Links with Hover Effects */
+  a {
+    color: var(--link-color);
     font-weight: bold;
     text-decoration: none;
     transition: color 0.3s ease-in-out;
-}
-
-a:hover {
+  }
+  
+  a:hover {
     text-decoration: underline;
     color: #004d40;
-}
-
-/* 💡 Mental Health Suggestions Box */
-.suggestions-box {
-    background: rgba(255, 255, 255, 0.95);
+  }
+  
+  /* 💡 Mental Health Suggestions Box */
+  .suggestions-box {
+    background: var(--card-bg);
     border-radius: 15px;
     padding: 20px;
     margin-top: 25px;
     box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
     text-align: left;
     transition: opacity 0.5s ease-in-out;
-}
-
-.suggestions-box p {
+  }
+  
+  .suggestions-box p {
     font-size: 16px;
     line-height: 1.6;
-    color: #37474f;
-}
-
-/* 🧘 Mental Health Text */
-.suggestions-box h5 {
+    color: var(--text-color);
+  }
+  
+  .suggestions-box h5 {
     font-size: 18px;
     font-weight: 600;
-    color: #00796b;
+    color: var(--text-color);
     margin-bottom: 15px;
-}
-
-/* 🌈 Fade-in Animation for Suggestions */
-@keyframes fadeIn {
+  }
+  
+  /* 🌈 Fade-in Animation for Suggestions */
+  @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
-}
-
-.fade-in {
+  }
+  
+  .fade-in {
     animation: fadeIn 0.5s ease-in-out;
-}
-
-/* 🎯 Smooth Scroll Behavior */
-html {
+  }
+  
+  /* 🎯 Smooth Scroll Behavior */
+  html {
     scroll-behavior: smooth;
-}
+  }
 
-/* 🖱️ Hover Effects for Cards */
-.card-container {
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-}
-
-.card-container:hover {
+  /* 🖱️ Hover Effects for Cards */
+  .card-container, .card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 900px;
+  }
+  
+  .card-container:hover {
     transform: translateY(-5px);
     box-shadow: 0px 12px 40px rgba(0, 0, 0, 0.2);
-}
-/* 🔴 Logout Button Styling */
-.logout-button {
+  }
+  
+  /* 🔴 Logout Button Styling */
+  .logout-button {
     position: absolute;
     top: 20px;
     right: 20px;
-    background-color: #d9534f;
+    background-color: var(--danger-color);
+    width: auto;
     border: none;
     padding: 8px 16px;
     font-size: 14px;
     font-weight: bold;
     border-radius: 5px;
-    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease-in-out;
-}
-
-.logout-button:hover {
+  }
+  
+  .logout-button:hover {
     background-color: #c9302c;
-    transform: scale(1.05);
-}
-body {
-    background: linear-gradient(135deg, #a8edea, #fed6e3);
-    background-size: cover;
   }
-  .card-container {
-    max-width: 900px;
-    width: 100%;
-    margin-top: 40px;
-    padding: 20px;
-    background: #ffffffd9;
-    border-radius: 20px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-  }
-  h2.title {
-    font-weight: 700;
-    font-size: 2.5rem;
-    color: #37474f;
-    margin-bottom: 25px;
-    animation: fadeIn 1s ease-in-out;
-  }
-  .form-control, .form-select {
-    margin-bottom: 15px;
-    border-radius: 10px;
-    font-size: 16px;
-    transition: all 0.3s ease-in-out;
-  }
-  .logout-button {
+  
+  /* Dark Mode Toggle Button */
+  /* Fixed Position for Dark Mode Toggle */
+#darkModeToggle {
     position: absolute;
     top: 20px;
-    right: 20px;
-    width: auto;
-    padding: 10px 20px;
+    right: 120px; /* Adjust the position as needed */
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background-color 0.3s ease-in-out;
   }
+  
+  #darkModeToggle:hover {
+    background-color: #00897b;
+    transform: scale(1.05);
+  }
+  
   #suggestions-box {
     display: none;
   }
@@ -216,4 +228,26 @@ body {
     left: 20px; /* Moves the button to the left */
     width: auto;
     padding: 10px 20px;
+}
+.scrollable-container {
+    max-height: 200px; /* Adjust as needed */
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #f9f9f9;
+}
+
+/* Custom Scrollbar */
+.scrollable-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollable-container::-webkit-scrollbar-thumb {
+    background: #4db6ac;
+    border-radius: 4px;
+}
+
+.scrollable-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
 }

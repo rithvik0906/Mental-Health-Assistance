@@ -136,6 +136,33 @@ async function handleGoogleAuth() {
 document.getElementById("google-signup-btn")?.addEventListener("click", handleGoogleAuth);
 document.getElementById("google-login-btn")?.addEventListener("click", handleGoogleAuth);
 
+  
+// Apply Dark Mode Based on Local Storage
+window.addEventListener('load', () => {
+    const storedMode = localStorage.getItem('darkMode');
+    const isDarkMode = storedMode === 'enabled';
+    
+    if (isDarkMode) {
+      document.body.classList.add('dark-mode');
+      document.getElementById('darkModeToggle').innerHTML = '🌞'; // Light Mode Emoji
+    } else {
+      document.body.classList.remove('dark-mode');
+      document.getElementById('darkModeToggle').innerHTML = '🌙'; // Dark Mode Emoji
+    }
+  });
+  
+  // Toggle Dark Mode and Save State
+  document.getElementById('darkModeToggle')?.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+  
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+  
+    document.getElementById('darkModeToggle').innerHTML = isDarkMode ? '🌞' : '🌙';
+  });
+  
+  
+  
 // 🔹 Logout Function
 document.getElementById("logout-btn")?.addEventListener("click", async () => {
     try {
@@ -162,6 +189,24 @@ document.getElementById("mental-health-form")?.addEventListener("submit", async 
     suggestionsText.innerHTML = "<p>Analyzing your problem... Please wait.</p>";
     hospitalSuggestion.innerHTML = "";
 
+    // Detect current location if selected
+    if (location === "Current Location") {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        const hospitalUrl = `https://www.google.com/maps/search/mental+health+hospital/@${latitude},${longitude},15z`;
+        //document.getElementById("hospital-suggestion").innerHTML = `<p><strong>Nearby Hospitals:</strong><br><a href="${hospitalUrl}" target="_blank">Find hospitals near your current location</a></p>`;
+        }, (error) => {
+        alert("Failed to get your location. Please check location permissions.");
+        });
+    } else {
+        alert("Geolocation is not supported by your browser.");
+    }
+    }
+
+
     try {
         const user = auth.currentUser;
         if (!user) {
@@ -182,8 +227,22 @@ document.getElementById("mental-health-form")?.addEventListener("submit", async 
         });
 
         const result = await model.generateContent(
-            `${ageText} The user is experiencing ${problem}. They describe it as: "${description}". Provide brief relaxation techniques and coping strategies in a well-formatted list.`
+            `The user is ${ageText} years old and is facing "${problem}". They describe it as: "${description}". 
+        
+            Analyze the user's emotions and detect the primary sentiment. 
+            Provide detailed insights into their emotional state based on the analysis.
+
+              - Suggest personalized advice considering their age and detected emotions.  
+              - Recommend effective coping techniques specific to their emotional state.  
+              - Provide practical relaxation exercises, mindset shifts, or self-care routines.  
+              - If signs of severe distress or crisis are identified, recommend seeking professional support.  
+
+            Keep responses clear, short, empathetic, supportive, and actionable.  
+            Use compassionate language that acknowledges the user's feelings.  
+            Format as a structured list with clear headings for each suggestion.
+            Make sure each and every point displays in a new line.`
         );
+        
 
         let text = await result.response.text();
         text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
@@ -192,7 +251,7 @@ document.getElementById("mental-health-form")?.addEventListener("submit", async 
 
         suggestionsText.innerHTML = text || "<p>No suggestions available at the moment.</p>";
         const hospitalUrl = `https://www.google.com/maps/search/mental+health+hospital+in+${encodeURIComponent(location)}`;
-        hospitalSuggestion.innerHTML = `<p><strong>Consider visiting a mental health specialist.</strong><br><a href="${hospitalUrl}" target="_blank">Find hospitals near ${location}</a></p>`;
+        hospitalSuggestion.innerHTML = `<p><strong>If the problem persists, Consider visiting a mental health specialist.</strong><br><a href="${hospitalUrl}" target="_blank">Find hospitals near ${location}</a></p>`;
         window.scrollTo({ top: 0, behavior: "smooth" });
 
     } catch (err) {
@@ -215,6 +274,7 @@ if (window.location.pathname.includes("profile.html")) {
                 const userData = userDoc.data();
                 document.getElementById("user-name").textContent = userData.name || "N/A";
                 document.getElementById("user-age").textContent = userData.age || "N/A";
+                document.getElementById("user-ph").textContent = userData.phone || "N/A";
             }
 
             const responseList = document.getElementById("response-list");
@@ -277,6 +337,7 @@ document.getElementById("editProfileBtn")?.addEventListener("click", async () =>
     } else {
       alert("User data not found!");
     }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   });
   
   document.getElementById("saveProfileBtn")?.addEventListener("click", async () => {

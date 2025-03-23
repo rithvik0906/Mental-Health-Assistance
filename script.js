@@ -5,6 +5,7 @@ import {
     signInWithEmailAndPassword,
     GoogleAuthProvider,
     signInWithPopup,
+    sendPasswordResetEmail,
     onAuthStateChanged,
     signOut
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
@@ -15,7 +16,6 @@ import {
     getDoc,
     collection,
     addDoc,
-    deleteDoc,
     getDocs
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai";
@@ -124,6 +124,21 @@ document.getElementById("login-btn")?.addEventListener("click", async () => {
         alert(error.message);
     }
 });
+
+//Forgot Password
+document.getElementById("forgot-password-link")?.addEventListener("click", async () => {
+    const email = prompt("Enter your registered email address:");
+    
+    if (!email) return alert("Please enter an email.");
+    
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("Password reset email sent. Please check your inbox.");
+    } catch (error) {
+      console.error("Error sending password reset email:", error);
+      alert(error.message);
+    }
+  });
 
 // 🔹 Google Signup & Login Function
 async function handleGoogleAuth() {

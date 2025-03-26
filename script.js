@@ -20,7 +20,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai";
 
-// ✅ Firebase Configuration
+// Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyBo2z3a__-RSjUXzjELJMXcc0c-BTdJkr0",
     authDomain: "mental-health-assistance-44093.firebaseapp.com",
@@ -31,7 +31,7 @@ const firebaseConfig = {
     measurementId: "G-PNBC83NNEC"
 };
 
-// ✅ Initialize Firebase
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore(app);
@@ -39,7 +39,7 @@ const provider = new GoogleAuthProvider();
 const genAI = new GoogleGenerativeAI("AIzaSyAy5yFD9fcE8b8Gr8ZNLz053SNybVE_OUs");
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-// 🔹 Ensure user is authenticated before accessing home page
+// Ensure user is authenticated before accessing home page
 onAuthStateChanged(auth, async (user) => {
     if (!user && window.location.pathname.includes("home.html")) {
         window.location.href = "index.html";
@@ -52,7 +52,7 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// 🔹 Signup Function (Email & Password with Confirm Password)
+// Signup Function (Email & Password with Confirm Password)
 document.getElementById("signup-btn")?.addEventListener("click", async () => {
     const name = document.getElementById("signup-name").value;
     const age = document.getElementById("signup-age").value;
@@ -61,25 +61,25 @@ document.getElementById("signup-btn")?.addEventListener("click", async () => {
     const password = document.getElementById("signup-password").value;
     const confirmPassword = document.getElementById("signup-confirm-password").value;
 
-    // ✅ Check if passwords match
+    // Check if passwords match
     if (password !== confirmPassword) {
         alert("Passwords do not match. Please enter the same password in both fields.");
         return;
     }
 
-    // ✅ Validate phone number
+    // Validate phone number
     if (!/^\d{10}$/.test(phone)) {
         alert("Phone number must be exactly 10 digits.");
         return;
     }
 
-    // ✅ Validate age
+    // Validate age
     if (age > 120) {
         alert("Age cannot be more than 120.");
         return;
     }
 
-    // ✅ Validate password
+    // Validate password
     if (password.length < 8 || !/\d/.test(password) || !/[a-zA-Z]/.test(password)) {
         alert("Password must be at least 8 characters long and contain at least one numerical digit and one letter.");
         return;
@@ -89,7 +89,7 @@ document.getElementById("signup-btn")?.addEventListener("click", async () => {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // ✅ Store user details in Firestore
+        // Store user details in Firestore
         await setDoc(doc(db, "users", user.uid), {
             name,
             age: age.toString(),
@@ -104,7 +104,7 @@ document.getElementById("signup-btn")?.addEventListener("click", async () => {
     }
 });
 
-// 🔹 Login Function (Email & Password)
+// Login Function (Email & Password)
 document.getElementById("login-btn")?.addEventListener("click", async () => {
     const email = document.getElementById("login-email").value;
     const password = document.getElementById("login-password").value;
@@ -113,19 +113,19 @@ document.getElementById("login-btn")?.addEventListener("click", async () => {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // ✅ Get user name from Firestore
+        //Get user name from Firestore
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
             alert(`Welcome, ${userDoc.data().name}!`);
         }
 
-        window.location.href = "home.html"; // Redirect to Home
+        window.location.href = "home.html";
     } catch (error) {
         alert(error.message);
     }
 });
 
-//Forgot Password
+// Forgot Password
 document.getElementById("forgot-password-link")?.addEventListener("click", async () => {
     const email = prompt("Enter your registered email address:");
     
@@ -140,16 +140,16 @@ document.getElementById("forgot-password-link")?.addEventListener("click", async
     }
   });
 
-// 🔹 Google Signup & Login Function
+// Google Signup & Login Function
 async function handleGoogleAuth() {
     try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
 
-        // ✅ Check if user exists in Firestore
+        // Check if user exists in Firestore
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (!userDoc.exists()) {
-            // ✅ Store new Google user in Firestore
+            // Store new Google user in Firestore
             await setDoc(doc(db, "users", user.uid), {
                 name: user.displayName,
                 age: user.age || "N/A",
@@ -159,7 +159,7 @@ async function handleGoogleAuth() {
         }
 
         alert("Google Login Successful!");
-        window.location.href = "home.html"; // Redirect to Home
+        window.location.href = "home.html";
     } catch (error) {
         alert(error.message);
     }
@@ -193,7 +193,7 @@ document.getElementById('darkModeToggle')?.addEventListener('click', () => {
     document.getElementById('darkModeToggle').innerHTML = isDarkMode ? '🌞' : '🌙';
 });
 
-// 🔹 Logout Function
+// Logout Function
 document.getElementById("logout-btn")?.addEventListener("click", async () => {
     try {
         await signOut(auth);
@@ -204,7 +204,7 @@ document.getElementById("logout-btn")?.addEventListener("click", async () => {
     }
 });
 
-// 🔹 Save Response to Firestore & Fetch Gemini AI Suggestions
+// Save Response to Firestore & Fetch Gemini AI Suggestions
 document.getElementById("mental-health-form")?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -288,12 +288,12 @@ document.getElementById("mental-health-form")?.addEventListener("submit", async 
         window.scrollTo({ top: 0, behavior: "smooth" });
 
     } catch (err) {
-        console.error("❌ Error fetching suggestions or saving data:", err);
+        console.error("Error fetching suggestions or saving data:", err);
         suggestionsText.innerHTML = "<p>Error fetching suggestions. Please try again.</p>";
     }
 });
 
-// 🔹 Load Profile Data on Profile Page
+// Load Profile Data on Profile Page
 if (window.location.pathname.includes("profile.html")) {
     onAuthStateChanged(auth, async (user) => {
         if (!user) {
@@ -332,18 +332,18 @@ if (window.location.pathname.includes("profile.html")) {
             }
 
         } catch (error) {
-            console.error("❌ Error loading profile data:", error);
+            console.error("Error loading profile data:", error);
             alert("Error loading profile data. Please try again.");
         }
     });
 }
 
-// 🔹 Redirect to Profile Page
+// Redirect to Profile Page
 document.getElementById("view-profile-btn")?.addEventListener("click", () => {
     window.location.href = "profile.html";
 });
 
-// 🔹 "Go Back" Button on Profile Page
+// "Go Back" Button on Profile Page
 document.getElementById("go-back-btn")?.addEventListener("click", () => {
     window.location.href = "home.html";
 });
@@ -386,13 +386,13 @@ document.getElementById("saveProfileBtn")?.addEventListener("click", async () =>
         phone: document.getElementById("editPhone").value,
     };
 
-    // ✅ Validate phone number
+    // Validate phone number
     if (!/^\d{10}$/.test(updatedData.phone)) {
         alert("Phone number must be exactly 10 digits.");
         return;
     }
 
-    // ✅ Validate age
+    // Validate age
     if (updatedData.age > 120) {
         alert("Age cannot be more than 120.");
         return;

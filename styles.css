@@ -1,4 +1,4 @@
-/* 🌿 Soothing Background with Gradient Animation (Light Mode) */
+/* Soothing Background with Gradient Animation (Light Mode) */
 :root {
     --bg-color: linear-gradient(135deg, #a8edea, #fed6e3, #a8edea);
     --card-bg: rgba(255, 255, 255, 0.95);
@@ -8,7 +8,7 @@
     --link-color: #00796b;
   }
   
-  /* 🌙 Dark Mode Colors */
+  /* Dark Mode Colors */
   .dark-mode {
     --bg-color: linear-gradient(135deg, #1e1e1e, #2c3e50, #34495e);
     --card-bg: rgba(40, 44, 52, 0.95);
@@ -37,14 +37,14 @@
     color: var(--text-color);
   }
   
-  /* 🌟 Gradient Animation */
+  /* Gradient Animation */
   @keyframes gradientBG {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
   
-  /* 📌 Card Styling with Hover Effect */
+  /*  Card Styling with Hover Effect */
   .card {
     background: var(--card-bg);
     box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.15);
@@ -60,7 +60,7 @@
     box-shadow: 0px 12px 40px rgba(0, 0, 0, 0.2);
   }
   
-  /* 🔹 Input Fields with Floating Labels */
+  /*  Input Fields with Floating Labels */
   .form-group {
     position: relative;
     margin-bottom: 20px;
@@ -82,7 +82,7 @@
     outline: none;
   }
   
-  /* 🎨 Buttons with Hover Effects */
+  /*  Buttons with Hover Effects */
   .btn {
     font-size: 16px;
     font-weight: bold;
@@ -113,7 +113,7 @@
     transform: scale(1.05);
 }
   
-  /* 🔗 Links with Hover Effects */
+  /*  Links with Hover Effects */
   a {
     color: var(--link-color);
     font-weight: bold;
@@ -126,7 +126,7 @@
     color: #004d40;
   }
   
-  /* 💡 Mental Health Suggestions Box */
+  /*  Mental Health Suggestions Box */
   .suggestions-box {
     background: var(--card-bg);
     border-radius: 15px;
@@ -150,7 +150,7 @@
     margin-bottom: 15px;
   }
   
-  /* 🌈 Fade-in Animation for Suggestions */
+  /* Fade-in Animation for Suggestions */
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -160,12 +160,12 @@
     animation: fadeIn 0.5s ease-in-out;
   }
   
-  /* 🎯 Smooth Scroll Behavior */
+  /* Smooth Scroll Behavior */
   html {
     scroll-behavior: smooth;
   }
 
-  /* 🖱️ Hover Effects for Cards */
+  /* Hover Effects for Cards */
   .card-container, .card {
     background: var(--card-bg);
     border-radius: 20px;
@@ -180,7 +180,7 @@
     box-shadow: 0px 12px 40px rgba(0, 0, 0, 0.2);
   }
   
-  /* 🔴 Logout Button Styling */
+  /* Logout Button Styling */
   .logout-button {
     position: absolute;
     top: 20px;
@@ -203,7 +203,7 @@
 #darkModeToggle {
     position: absolute;
     top: 20px;
-    right: 120px; /* Adjust the position as needed */
+    right: 120px;
     background-color: var(--primary-color);
     color: var(--text-color);
     border: none;
@@ -225,12 +225,12 @@
   .view-profile-btn {
     position: absolute;
     top: 20px;
-    left: 20px; /* Moves the button to the left */
+    left: 20px;
     width: auto;
     padding: 10px 20px;
 }
 .scrollable-container {
-    max-height: 200px; /* Adjust as needed */
+    max-height: 200px;
     overflow-y: auto;
     border: 1px solid #ddd;
     border-radius: 8px;

@@ -254,7 +254,7 @@ document.getElementById("mental-health-form")?.addEventListener("submit", async 
         let userAge = userDoc.exists() ? userDoc.data().age : "Unknown";
         let ageText = (userAge && userAge !== "N/A" && userAge !== "Unknown") ? `The user is ${userAge} years old.` : "";
 
-        await addDoc(collection(db, "responses"), {
+        await addDoc(collection(db, "users", user.uid, "responses"), {
             uid: user.uid,
             problem: problem,
             description: description,
@@ -313,18 +313,16 @@ if (window.location.pathname.includes("profile.html")) {
             const responseList = document.getElementById("response-list");
             responseList.innerHTML = "";
 
-            const responsesSnapshot = await getDocs(collection(db, "responses"));
+            const responsesSnapshot = await getDocs(collection(db, "users", user.uid, "responses"));
             let hasResponses = false;
 
             responsesSnapshot.forEach(doc => {
                 const response = doc.data();
-                if (response.uid === user.uid) {
                     hasResponses = true;
                     const li = document.createElement("li");
                     li.classList.add("list-group-item");
                     li.innerHTML = `<strong>${response.problem}</strong> - ${response.description} <br><small>Location: ${response.location}</small>`;
                     responseList.appendChild(li);
-                }
             });
 
             if (!hasResponses) {

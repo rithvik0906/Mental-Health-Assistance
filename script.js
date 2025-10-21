@@ -18,7 +18,7 @@ import {
     addDoc,
     getDocs
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
-import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai";
+import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.21.0";
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -36,8 +36,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
-const genAI = new GoogleGenerativeAI("AIzaSyAy5yFD9fcE8b8Gr8ZNLz053SNybVE_OUs");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+// Google AI Studio API key + model
+const genAI = new GoogleGenerativeAI("AIzaSyCg0RPScwmZR2kC1iPtZnlYZj__biO0YJA");
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 // Ensure user is authenticated before accessing home page
 onAuthStateChanged(auth, async (user) => {
@@ -263,8 +265,7 @@ document.getElementById("mental-health-form")?.addEventListener("submit", async 
         });
 
         const result = await model.generateContent(
-            `The user is ${ageText} years old and is facing "${problem}". They describe it as: "${description}".
-
+            `The user is ${ageText} and is facing "${problem}". Description: "${description}".
             Analyze the user's emotions and detect the primary sentiment.
             Provide detailed insights into their emotional state based on the analysis.
 
@@ -277,7 +278,7 @@ document.getElementById("mental-health-form")?.addEventListener("submit", async 
             Use compassionate language that acknowledges the user's feelings.
             Format as a structured list with clear headings for each suggestion.
             Make sure each and every point displays in a new line.`
-        );
+    );
 
         let text = await result.response.text();
         text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");

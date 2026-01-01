@@ -207,7 +207,7 @@ mentalHealthForm?.addEventListener("submit", async (e) => {
 
     // 🔹 Call backend AI
     const token = await user.getIdToken();
-    const res = await fetch("http://localhost:3000/api/ai", {
+    const res = await fetch("https://mental-health-assistance-ppru.onrender.com", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

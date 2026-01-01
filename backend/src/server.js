@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
+
 import express from "express";
 import cors from "cors";
 
@@ -8,60 +9,78 @@ import { model } from "./gemini.js";
 
 const app = express();
 
-// ===== MIDDLEWARE =====
-app.use(cors());
+/* ================= MIDDLEWARE ================= */
+
+// Allow requests from GitHub Pages (or allow all during dev)
+app.use(
+  cors({
+    origin: "*", // 🔒 You can later restrict to your GitHub Pages URL
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+  })
+);
+
 app.use(express.json());
 
-// ===== HEALTH CHECK (IMPORTANT FOR RENDER) =====
+/* ================= HEALTH CHECK ================= */
+// Render requires a working root endpoint
 app.get("/", (req, res) => {
-  res.json({ status: "✅ Backend is running" });
+  res.status(200).json({
+    status: "✅ Backend is running on Render"
+  });
 });
 
-// ===== AI ROUTE =====
+/* ================= AI ROUTE ================= */
 app.post("/api/ai", async (req, res) => {
   try {
-    // ---- AUTH CHECK ----
+    /* -------- AUTH -------- */
     const authHeader = req.headers.authorization;
+
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "Missing or invalid token" });
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
     const token = authHeader.split(" ")[1];
-    const decodedToken = await auth.verifyIdToken(token);
+    await auth.verifyIdToken(token);
 
-    // ---- INPUT VALIDATION ----
+    /* -------- VALIDATION -------- */
     const { problem, description, age } = req.body;
 
     if (!problem || !description) {
-      return res.status(400).json({ error: "Problem and description required" });
+      return res.status(400).json({
+        error: "Problem and description are required"
+      });
     }
 
-    // ---- PROMPT ----
+    /* -------- PROMPT -------- */
     const prompt = `
-User age: ${age || "Unknown"}
+User Age: ${age || "Unknown"}
 Problem: ${problem}
 Description: ${description}
 
-Give empathetic, safe, concise mental health guidance.
+Provide empathetic, supportive mental health guidance.
 Do NOT diagnose.
-If severe distress is implied, gently recommend professional help.
+Encourage professional help if distress appears severe.
+Keep the response concise and calming.
 `;
 
-    // ---- GEMINI CALL ----
+    /* -------- GEMINI -------- */
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
 
-    return res.json({ response: responseText });
+    res.status(200).json({ response: responseText });
 
-  } catch (err) {
-    console.error("❌ AI API error:", err);
-    return res.status(500).json({ error: "AI processing failed" });
+  } catch (error) {
+    console.error("❌ AI Error:", error);
+    res.status(500).json({
+      error: "Failed to process AI request"
+    });
   }
 });
 
-// ===== START SERVER =====
+/* ================= START SERVER ================= */
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`🔥 Backend running on port ${PORT}`);
+  console.log(`🚀 Backend running on port ${PORT}`);
 });

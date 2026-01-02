@@ -43,25 +43,50 @@ const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
 // ================= DOM ELEMENTS =================
+const signupBtn = document.getElementById("signup-btn");
+const loginBtn = document.getElementById("login-btn");
+const googleSignupBtn = document.getElementById("google-signup-btn");
+const googleLoginBtn = document.getElementById("google-login-btn");
+const logoutBtn = document.getElementById("logout-btn");
+
 const mentalHealthForm = document.getElementById("mental-health-form");
 const suggestionsBox = document.getElementById("suggestions-box");
 const suggestionsText = document.getElementById("suggestions-text");
 const hospitalBox = document.getElementById("hospital-suggestion");
-const logoutBtn = document.getElementById("logout-btn");
+
 const darkModeToggle = document.getElementById("darkModeToggle");
 const viewProfileBtn = document.getElementById("view-profile-btn");
 const goBackBtn = document.getElementById("go-back-btn");
 
-// ================= FORM INPUTS =================
+// ================= INPUTS =================
+const signupName = document.getElementById("signup-name");
+const signupAge = document.getElementById("signup-age");
+const signupPhone = document.getElementById("signup-phone");
+const signupEmail = document.getElementById("signup-email");
+const signupPassword = document.getElementById("signup-password");
+const signupConfirmPassword = document.getElementById("signup-confirm-password");
+
+const loginEmail = document.getElementById("login-email");
+const loginPassword = document.getElementById("login-password");
+
 const problemSelect = document.getElementById("problem");
 const descriptionInput = document.getElementById("description");
 const locationSelect = document.getElementById("location");
 
-// ================= PROFILE ELEMENTS =================
+// ================= PROFILE =================
 const userNameSpan = document.getElementById("user-name");
 const userAgeSpan = document.getElementById("user-age");
 const userPhoneSpan = document.getElementById("user-ph");
 const responseList = document.getElementById("response-list");
+
+// ================= EDIT PROFILE =================
+const editProfileBtn = document.getElementById("editProfileBtn");
+const editProfileForm = document.getElementById("editProfileForm");
+const saveProfileBtn = document.getElementById("saveProfileBtn");
+
+const editNameInput = document.getElementById("editName");
+const editAgeInput = document.getElementById("editAge");
+const editPhoneInput = document.getElementById("editPhone");
 
 // ================= AUTH GUARD =================
 onAuthStateChanged(auth, async (user) => {
@@ -73,13 +98,75 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   if (user && path.endsWith("home.html")) {
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    if (userDoc.exists()) {
+    const snap = await getDoc(doc(db, "users", user.uid));
+    if (snap.exists()) {
       document.getElementById("form-greeting").textContent =
-        `Hey ${userDoc.data().name}!`;
+        `Hey ${snap.data().name}!`;
     }
   }
 });
+
+// ================= SIGNUP =================
+signupBtn?.addEventListener("click", async () => {
+  if (signupPassword.value !== signupConfirmPassword.value)
+    return alert("Passwords do not match");
+
+  try {
+    const cred = await createUserWithEmailAndPassword(
+      auth,
+      signupEmail.value,
+      signupPassword.value
+    );
+
+    await setDoc(doc(db, "users", cred.user.uid), {
+      name: signupName.value,
+      age: signupAge.value,
+      phone: signupPhone.value,
+      email: signupEmail.value
+    });
+
+    window.location.href = "index.html";
+  } catch (e) {
+    alert(e.message);
+  }
+});
+
+// ================= LOGIN =================
+loginBtn?.addEventListener("click", async () => {
+  try {
+    await signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value);
+    window.location.href = "home.html";
+  } catch (e) {
+    alert(e.message);
+  }
+});
+
+// ================= GOOGLE AUTH =================
+async function googleAuth() {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    const ref = doc(db, "users", user.uid);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) {
+      await setDoc(ref, {
+        name: user.displayName,
+        email: user.email,
+        phone: user.phoneNumber || "N/A",
+        age: "N/A"
+      });
+    }
+
+    window.location.href = "home.html";
+  } catch (err) {
+    alert("Google sign-in failed. Please allow popups.");
+  }
+}
+
+googleSignupBtn?.addEventListener("click", googleAuth);
+googleLoginBtn?.addEventListener("click", googleAuth);
 
 // ================= LOGOUT =================
 logoutBtn?.addEventListener("click", async () => {
@@ -102,7 +189,7 @@ darkModeToggle?.addEventListener("click", () => {
   darkModeToggle.textContent = enabled ? "🌞" : "🌙";
 });
 
-// ================= AI FORM SUBMIT =================
+// ================= AI FORM =================
 mentalHealthForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -111,24 +198,15 @@ mentalHealthForm?.addEventListener("submit", async (e) => {
   hospitalBox.innerHTML = "";
 
   const user = auth.currentUser;
-  if (!user) {
-    alert("Login required");
-    return;
-  }
+  if (!user) return alert("Login required");
+
+  const userDoc = await getDoc(doc(db, "users", user.uid));
+  const age = userDoc.exists() ? userDoc.data().age : "Unknown";
+
+  let data;
 
   try {
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    const age = userDoc.exists() ? userDoc.data().age : "Unknown";
-
-    await addDoc(collection(db, "users", user.uid, "responses"), {
-      problem: problemSelect.value,
-      description: descriptionInput.value,
-      location: locationSelect.value,
-      timestamp: new Date()
-    });
-
     const token = await user.getIdToken();
-
     const res = await fetch(`${API_BASE_URL}/api/ai`, {
       method: "POST",
       headers: {
@@ -142,70 +220,130 @@ mentalHealthForm?.addEventListener("submit", async (e) => {
       })
     });
 
-    const data = await res.json();
-    suggestionsText.innerHTML = data.response || "No suggestions available.";
+    if (!res.ok) throw new Error("AI failed");
 
-    const location = locationSelect.value;
+    data = await res.json();
+    suggestionsText.innerHTML = data.response;
+  } catch {
+    suggestionsText.textContent =
+      "⚠️ Unable to get AI response right now. Please try again later.";
+    return;
+  }
 
-    if (location === "Current Location") {
-      if (!navigator.geolocation) {
-        hospitalBox.textContent = "Geolocation not supported.";
-        return;
+  await addDoc(collection(db, "users", user.uid, "responses"), {
+    problem: problemSelect.value,
+    description: descriptionInput.value,
+    location: locationSelect.value,
+    aiResponse: data.response,
+    timestamp: new Date()
+  });
+
+  const location = locationSelect.value;
+  if (!location) return;
+
+  if (location === "Current Location") {
+    hospitalBox.innerHTML = "📍 Detecting your location…";
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        const mapsUrl =
+          `https://www.google.com/maps/search/mental+health+hospital/@${latitude},${longitude},14z`;
+
+        hospitalBox.innerHTML = `
+          <hr/>
+          <h6>🏥 Nearby Mental Health Support</h6>
+          <a href="${mapsUrl}" target="_blank" class="btn btn-outline-success">
+            Find Mental Health Hospitals Near You
+          </a>
+        `;
+      },
+      () => {
+        hospitalBox.innerHTML = "❌ Location permission denied.";
       }
+    );
+  } else {
+    const mapsUrl =
+      `https://www.google.com/maps/search/mental+health+hospital+in+${encodeURIComponent(location)}`;
 
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          const mapsUrl = `https://www.google.com/maps/search/mental+health+hospital/@${latitude},${longitude},14z`;
-
-          hospitalBox.innerHTML = `
-            <hr/>
-            <h6>🏥 Nearby Mental Health Support</h6>
-            <a href="${mapsUrl}" target="_blank" class="btn btn-outline-success">
-              Find Mental Health Hospitals Near You
-            </a>
-          `;
-        },
-        () => {
-          hospitalBox.textContent = "Location permission denied.";
-        }
-      );
-    } else {
-      const mapsUrl = `https://www.google.com/maps/search/mental+health+hospital+in+${encodeURIComponent(location)}`;
-
-      hospitalBox.innerHTML = `
-        <hr/>
-        <h6>🏥 Mental Health Support in ${location}</h6>
-        <a href="${mapsUrl}" target="_blank" class="btn btn-outline-success">
-          Find Mental Health Hospitals in ${location}
-        </a>
-      `;
-    }
-  } catch (err) {
-    console.error(err);
-    suggestionsText.textContent = "Something went wrong. Please try again.";
+    hospitalBox.innerHTML = `
+      <hr/>
+      <h6>🏥 Mental Health Support in ${location}</h6>
+      <a href="${mapsUrl}" target="_blank" class="btn btn-outline-success">
+        Find Mental Health Hospitals in ${location}
+      </a>
+    `;
   }
 });
 
-// ================= PROFILE PAGE =================
+// ================= PROFILE + EDIT PROFILE =================
 if (window.location.pathname.endsWith("profile.html")) {
   onAuthStateChanged(auth, async (user) => {
     if (!user) return;
 
-    const userDoc = await getDoc(doc(db, "users", user.uid));
-    const d = userDoc.data();
+    const userRef = doc(db, "users", user.uid);
+    const snap = await getDoc(userRef);
+    if (!snap.exists()) return;
 
+    const d = snap.data();
+
+    // ---------- DISPLAY PROFILE ----------
     userNameSpan.textContent = d.name;
     userAgeSpan.textContent = d.age;
     userPhoneSpan.textContent = d.phone;
 
+    // ---------- LOAD RESPONSES ----------
     responseList.innerHTML = "";
-    const snap = await getDocs(collection(db, "users", user.uid, "responses"));
-    snap.forEach(r => {
+    const qs = await getDocs(collection(db, "users", user.uid, "responses"));
+    qs.forEach((r) => {
       const li = document.createElement("li");
-      li.className = "list-group-item";
-      li.textContent = `${r.data().problem} - ${r.data().description}`;
+      li.textContent = `${r.data().problem} — ${r.data().aiResponse}`;
       responseList.appendChild(li);
+    });
+
+    // ---------- EDIT PROFILE ----------
+    editProfileBtn?.addEventListener("click", () => {
+      editProfileForm.style.display = "block";
+
+      editNameInput.value = d.name || "";
+      editAgeInput.value = d.age || "";
+      editPhoneInput.value = d.phone || "";
+    });
+
+    saveProfileBtn?.addEventListener("click", async () => {
+      const name = editNameInput.value.trim();
+      const age = editAgeInput.value.trim();
+      const phone = editPhoneInput.value.trim();
+
+      // 🔐 HARD VALIDATION (NO GARBAGE DATA)
+      if (!name || !age || !phone) {
+        alert("All fields are required");
+        return;
+      }
+
+      if (age <= 0 || age > 120) {
+        alert("Invalid age");
+        return;
+      }
+
+      if (!/^\d{10}$/.test(phone)) {
+        alert("Phone number must be 10 digits");
+        return;
+      }
+
+      await setDoc(
+        userRef,
+        { name, age, phone },
+        { merge: true }
+      );
+
+      // Update UI instantly
+      userNameSpan.textContent = name;
+      userAgeSpan.textContent = age;
+      userPhoneSpan.textContent = phone;
+
+      editProfileForm.style.display = "none";
+      alert("Profile updated successfully ✅");
     });
   });
 }

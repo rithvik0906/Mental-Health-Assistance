@@ -61,3 +61,4 @@ This project is licensed under the MIT License.
 ---
 Feel free to report any issues or suggest improvements via the [Issues tab](https://github.com/your-username/mental-health-assistance-app/issues).
 
+Mail: rithvik0906@gmail.com
